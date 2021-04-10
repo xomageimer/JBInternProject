@@ -1,7 +1,6 @@
 #include "App.h"
 #include "Frame.h"
 
-#include <thread>
 #include <iostream>
 
 IMPLEMENT_APP(App)
