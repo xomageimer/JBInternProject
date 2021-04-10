@@ -5,7 +5,7 @@ wxBEGIN_EVENT_TABLE(Frame, wxFrame)
                 EVT_MENU(wxID_ABOUT, Frame::OnAbout)
                 EVT_BUTTON(ID_BUTTON_INPUT,  Frame::OnInput)
                 EVT_SIZE(Frame::OnSize)
-                //EVT_TEXT(wxID_ANY, Frame::OnInput)
+               // EVT_TEXT(1, Frame::OnInput)
 wxEND_EVENT_TABLE()
 
 Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -38,7 +38,7 @@ Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
 
     wxBoxSizer *InputSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_txt_input= new wxTextCtrl(this, wxID_ANY);
+    m_txt_input= new wxTextCtrl(this, 1);
     InputSizer->Add(m_txt_input, 1);
 
     InputSizer->Add(10, 0);
@@ -76,6 +76,7 @@ void Frame::OnAbout(wxCommandEvent& event) {
 }
 
 void Frame::OnInput(wxCommandEvent &event) {
+    //std::cout << "call" << std::endl;
     searcher->BrokeIt();
     tp.Reset();
     if (!m_txt_output->IsEmpty())

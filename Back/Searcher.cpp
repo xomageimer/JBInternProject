@@ -9,8 +9,6 @@ Searcher::Searcher(const std::string &file_name, wxTextCtrl * Out, wxStatusBar *
 }
 
 void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class SearchPredicate>& predicate) {
-    Broke = false;
-
     file.clear();
     file.seekg(0);
     statusBar->SetStatusText("Searching...");
@@ -21,6 +19,7 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
                if (!Output->IsEmpty())
                    Output->Clear();
            }
+        Broke = false;
         process_count++;
 //        std::vector<std::future<void>> To_Wait;
 //        {
