@@ -18,12 +18,8 @@ public:
     explicit ThreadPool(size_t ThreadCount);
     ~ThreadPool();
 
-    size_t getQueueSize() const {
-        return Tasks.size();
-    };
-
     void Reset();
-    bool Ready();
+    size_t WorkersCount();
 private:
     std::mutex mut;
     std::condition_variable cv;

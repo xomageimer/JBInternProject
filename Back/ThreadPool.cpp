@@ -50,7 +50,7 @@ void ThreadPool::Reset() {
         Tasks.pop();
 }
 
-bool ThreadPool::Ready() {
+size_t ThreadPool::WorkersCount() {
     size_t WorkersCount = 0;
     {
         std::lock_guard lk(mut);
@@ -58,5 +58,5 @@ bool ThreadPool::Ready() {
             WorkersCount += cur_state;
     }
 
-    return !WorkersCount && Tasks.empty();
+    return WorkersCount;
 }

@@ -16,8 +16,13 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
     statusBar->SetStatusText("Searching...");
 
     threadPool.AddTask([this, &threadPool, predicate] {
-        std::vector<std::future<void>> To_Wait;
-        {
+           while (threadPool.WorkersCount() != 1) {
+               std::this_thread::yield();
+               Output->Clear();
+           }
+        process_count++;
+//        std::vector<std::future<void>> To_Wait;
+//        {
             std::vector<std::string> chunk;
             chunk.reserve(ChunkAvrSize);
             std::string word;
@@ -30,23 +35,27 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
                 i++;
                 if (i == ChunkAvrSize) {
                     i = 0;
-                    To_Wait.push_back(threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate));
+                    threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate);
                     chunk.clear();
                 }
             }
             if (i != 0) {
-                To_Wait.push_back(threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate));
+                threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate);
             }
-        }
+//        }
+        process_count--;
+        if (!process_count)
+            statusBar->SetStatusText("Ready!");
 
-        for (auto &fut : To_Wait)
-            fut.get();
+//        for (auto &fut : To_Wait)
+//            fut.get();
 
-        statusBar->SetStatusText("Ready!");
+//        statusBar->SetStatusText("Ready!");
     });
 }
 
 void Searcher::Process(std::vector<std::string> chunk, const std::shared_ptr<class SearchPredicate>& pred) {
+    process_count++;
     for (auto & el : chunk){
         if (Broke)
             return;
@@ -55,6 +64,9 @@ void Searcher::Process(std::vector<std::string> chunk, const std::shared_ptr<cla
             Write(el);
     }
     chunk.clear();
+    process_count--;
+    if (!process_count)
+        statusBar->SetStatusText("Ready!");
 }
 
 void Searcher::BrokeIt() {

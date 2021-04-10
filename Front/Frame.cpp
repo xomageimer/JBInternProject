@@ -75,16 +75,16 @@ void Frame::OnAbout(wxCommandEvent& event) {
 }
 
 void Frame::OnInput(wxCommandEvent &event) {
+    searcher->BrokeIt();
+    tp.Reset();
     m_txt_output->Clear();
-   // searcher->BrokeIt();
-  //  tp.Reset();
 
     std::string word = m_txt_input->GetValue().ToStdString();
     if (word.empty())
         return;
 
     std::shared_ptr<SearchPredicate> predicate;
-    if (m_chkBox)
+    if (m_chkBox->GetValue())
         predicate = std::make_shared<ConsecutiveSearch>(word);
     else
         predicate = std::make_shared<DefaultSearch>(word);
