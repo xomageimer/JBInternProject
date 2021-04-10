@@ -11,7 +11,6 @@ Searcher::Searcher(const std::string &file_name, wxTextCtrl * Out, wxStatusBar *
 void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class SearchPredicate>& predicate) {
     file.clear();
     file.seekg(0);
-    statusBar->SetStatusText("Searching...");
 
     threadPool.AddTask([this, &threadPool, predicate] {
            while (threadPool.WorkersCount() != 1) {
@@ -19,6 +18,7 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
                if (!Output->IsEmpty())
                    Output->Clear();
            }
+        statusBar->SetStatusText("Searching...");
         Broke = false;
         process_count++;
 //        std::vector<std::future<void>> To_Wait;
@@ -28,8 +28,12 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
             std::string word;
             size_t i = 0;
             while (getline(file, word)) {
-                if (Broke)
+                if (Broke) {
+                    process_count--;
+                    if (!process_count)
+                        statusBar->SetStatusText("Ready!");
                     return;
+                }
 
                 chunk.push_back(word);
                 i++;
@@ -57,8 +61,12 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
 void Searcher::Process(std::vector<std::string> chunk, const std::shared_ptr<class SearchPredicate>& pred) {
     process_count++;
     for (auto & el : chunk){
-        if (Broke)
+        if (Broke) {
+            process_count--;
+            if (!process_count)
+                statusBar->SetStatusText("Ready!");
             return;
+        }
 
         if (pred->Compare(el))
             Write(el);

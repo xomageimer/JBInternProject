@@ -5,7 +5,7 @@ wxBEGIN_EVENT_TABLE(Frame, wxFrame)
                 EVT_MENU(wxID_ABOUT, Frame::OnAbout)
                 EVT_BUTTON(ID_BUTTON_INPUT,  Frame::OnInput)
                 EVT_SIZE(Frame::OnSize)
-               // EVT_TEXT(1, Frame::OnInput)
+                //EVT_TEXT(1, Frame::OnInput)
 wxEND_EVENT_TABLE()
 
 Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
