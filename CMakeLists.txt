@@ -11,8 +11,6 @@ set(wxWidgets_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/WXWIN/lib/gcc_lib") # для 
 
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 
-#add_executable(main main.cpp)
-
 add_executable(Application Front/App.cpp Front/App.h Front/Frame.cpp Front/Frame.h Back/ThreadPool.cpp Back/Searcher.cpp)
 
 if(wxWidgets_FOUND)
