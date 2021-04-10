@@ -18,7 +18,8 @@ void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class
     threadPool.AddTask([this, &threadPool, predicate] {
            while (threadPool.WorkersCount() != 1) {
                std::this_thread::yield();
-               Output->Clear();
+               if (!Output->IsEmpty())
+                   Output->Clear();
            }
         process_count++;
 //        std::vector<std::future<void>> To_Wait;

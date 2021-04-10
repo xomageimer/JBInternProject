@@ -34,7 +34,7 @@ private:
 wxDECLARE_EVENT_TABLE();
 };
 
-enum { ID_BUTTON_OUT = 1, ID_BUTTON_INPUT };
+enum { ID_BUTTON_INPUT = 1};
 
 
 #endif //JBINTERNPROJECT_FRAME_H

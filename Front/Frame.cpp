@@ -5,10 +5,11 @@ wxBEGIN_EVENT_TABLE(Frame, wxFrame)
                 EVT_MENU(wxID_ABOUT, Frame::OnAbout)
                 EVT_BUTTON(ID_BUTTON_INPUT,  Frame::OnInput)
                 EVT_SIZE(Frame::OnSize)
+                //EVT_TEXT(wxID_ANY, Frame::OnInput)
 wxEND_EVENT_TABLE()
 
 Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
-    : wxFrame(NULL, wxID_ANY, title, pos, size), tp(std::thread::hardware_concurrency() ? std::thread::hardware_concurrency() : 1)
+    : wxFrame(NULL, wxID_ANY, title, pos, size), tp(std::thread::hardware_concurrency() ? std::thread::hardware_concurrency() - 1 : 1)
 {
     wxMenu* menuFile = new wxMenu();
     menuFile->Append(wxID_EXIT);
@@ -77,7 +78,8 @@ void Frame::OnAbout(wxCommandEvent& event) {
 void Frame::OnInput(wxCommandEvent &event) {
     searcher->BrokeIt();
     tp.Reset();
-    m_txt_output->Clear();
+    if (!m_txt_output->IsEmpty())
+        m_txt_output->Clear();
 
     std::string word = m_txt_input->GetValue().ToStdString();
     if (word.empty())

@@ -25,7 +25,7 @@ private:
     wxStatusBar * statusBar;
     wxTextCtrl * Output;
 
-    size_t process_count = 0;
+    std::atomic_size_t process_count = 0;
 
     std::fstream file;
     size_t const ChunkAvrSize = 1500;
