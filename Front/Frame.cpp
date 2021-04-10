@@ -1,7 +1,6 @@
 #include "Frame.h"
 
 wxBEGIN_EVENT_TABLE(Frame, wxFrame)
-                EVT_BUTTON(ID_BUTTON_OUT, Frame::OnOut)
                 EVT_MENU(wxID_EXIT, Frame::OnExit)
                 EVT_MENU(wxID_ABOUT, Frame::OnAbout)
                 EVT_BUTTON(ID_BUTTON_INPUT,  Frame::OnInput)
@@ -9,7 +8,7 @@ wxBEGIN_EVENT_TABLE(Frame, wxFrame)
 wxEND_EVENT_TABLE()
 
 Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
-    : wxFrame(NULL, wxID_ANY, title, pos, size)
+    : wxFrame(NULL, wxID_ANY, title, pos, size), tp(std::thread::hardware_concurrency() ? std::thread::hardware_concurrency() : 1)
 {
     wxMenu* menuFile = new wxMenu();
     menuFile->Append(wxID_EXIT);
@@ -54,6 +53,8 @@ Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
     mainSizer->Add(m_txt_output, 1,  wxEXPAND | wxLEFT | wxTOP | wxRIGHT | wxBOTTOM, 5);
 
     SetSizer(mainSizer);
+
+    searcher = std::make_shared<Searcher>("words.txt", m_txt_output, GetStatusBar());
 }
 
 void Frame::OnSize(wxSizeEvent &event) {
@@ -74,9 +75,19 @@ void Frame::OnAbout(wxCommandEvent& event) {
 }
 
 void Frame::OnInput(wxCommandEvent &event) {
+    m_txt_output->Clear();
+   // searcher->BrokeIt();
+  //  tp.Reset();
 
-}
+    std::string word = m_txt_input->GetValue().ToStdString();
+    if (word.empty())
+        return;
 
-void Frame::OnOut(wxCommandEvent &event) {
+    std::shared_ptr<SearchPredicate> predicate;
+    if (m_chkBox)
+        predicate = std::make_shared<ConsecutiveSearch>(word);
+    else
+        predicate = std::make_shared<DefaultSearch>(word);
 
+    searcher->PrepareSource(tp, predicate);
 }

@@ -2,7 +2,7 @@
 
 #include <utility>
 
-Searcher::Searcher(const std::string &file_name, std::ostream & Out) : Output(Out){
+Searcher::Searcher(const std::string &file_name, wxTextCtrl * Out, wxStatusBar * Status) : Output(Out), statusBar(Status){
     file.open(file_name);
     if (!file.is_open())
         throw std::logic_error("Can't open file: " + file_name);
@@ -11,31 +11,39 @@ Searcher::Searcher(const std::string &file_name, std::ostream & Out) : Output(Ou
 void Searcher::PrepareSource(ThreadPool &threadPool, const std::shared_ptr<class SearchPredicate>& predicate) {
     Broke = false;
 
-    std::vector<std::future<void>> To_Wait;
-    {
-        std::vector<std::string> chunk;
-        chunk.reserve(ChunkAvrSize);
-        std::string word;
-        size_t i = 0;
-        while (getline(file, word)) {
-            if (Broke)
-                return;
+    file.clear();
+    file.seekg(0);
+    statusBar->SetStatusText("Searching...");
 
-            chunk.push_back(word);
-            i++;
-            if (i == ChunkAvrSize) {
-                i = 0;
+    threadPool.AddTask([this, &threadPool, predicate] {
+        std::vector<std::future<void>> To_Wait;
+        {
+            std::vector<std::string> chunk;
+            chunk.reserve(ChunkAvrSize);
+            std::string word;
+            size_t i = 0;
+            while (getline(file, word)) {
+                if (Broke)
+                    return;
+
+                chunk.push_back(word);
+                i++;
+                if (i == ChunkAvrSize) {
+                    i = 0;
+                    To_Wait.push_back(threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate));
+                    chunk.clear();
+                }
+            }
+            if (i != 0) {
                 To_Wait.push_back(threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate));
-                chunk.clear();
             }
         }
-        if (i != 0) {
-            To_Wait.push_back(threadPool.AddTask(&Searcher::Process, this, std::move(chunk), predicate));
-        }
-    }
 
-    for (auto & fut : To_Wait)
-        fut.get();
+        for (auto &fut : To_Wait)
+            fut.get();
+
+        statusBar->SetStatusText("Ready!");
+    });
 }
 
 void Searcher::Process(std::vector<std::string> chunk, const std::shared_ptr<class SearchPredicate>& pred) {
@@ -44,7 +52,7 @@ void Searcher::Process(std::vector<std::string> chunk, const std::shared_ptr<cla
             return;
 
         if (pred->Compare(el))
-            Write(std::move(el));
+            Write(el);
     }
     chunk.clear();
 }
@@ -72,7 +80,7 @@ bool ConsecutiveSearch::Compare(std::string const & to_compare) {
     return false;
 }
 
-void Searcher::Write(std::string word) {
+void Searcher::Write(std::string const & word) {
     std::lock_guard lk(console_mut);
-    Output << word << std::endl;
+    Output->AppendText(word + " ");
 }

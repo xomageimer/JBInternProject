@@ -18,6 +18,10 @@ public:
     explicit ThreadPool(size_t ThreadCount);
     ~ThreadPool();
 
+    size_t getQueueSize() const {
+        return Tasks.size();
+    };
+
     void Reset();
     bool Ready();
 private:

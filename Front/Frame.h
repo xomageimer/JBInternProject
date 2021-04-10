@@ -10,6 +10,9 @@
 #include <wx/listbox.h>
 #include <wx/valgen.h>
 
+#include "../Back/ThreadPool.h"
+#include "../Back/Searcher.h"
+
 class Frame : public wxFrame
 {
 public:
@@ -19,12 +22,14 @@ public:
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnInput(wxCommandEvent& event);
-    void OnOut(wxCommandEvent& event);
     void OnSize(wxSizeEvent& event);
 private:
     wxTextCtrl *m_txt_input;
     wxTextCtrl *m_txt_output;
     wxCheckBox *m_chkBox;
+
+    ThreadPool tp;
+    std::shared_ptr<Searcher> searcher;
 
 wxDECLARE_EVENT_TABLE();
 };
