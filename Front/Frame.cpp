@@ -71,14 +71,7 @@ void Frame::OnSize(wxSizeEvent &event) {
 
 void Frame::OnExit(wxCommandEvent& event)
 {
-    searcher->BrokeIt();
-    tp.Reset();
-    tp.AddTask([this] {
-        while (tp.WorkersCount() != 1) {
-            std::this_thread::yield();
-        }
-        Close(true);
-    });
+    Close(true);
 }
 
 void Frame::OnAbout(wxCommandEvent& event) {
