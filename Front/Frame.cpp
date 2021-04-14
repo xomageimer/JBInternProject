@@ -6,6 +6,7 @@ wxBEGIN_EVENT_TABLE(Frame, wxFrame)
                 EVT_BUTTON(ID_BUTTON_INPUT,  Frame::OnInput)
                 EVT_SIZE(Frame::OnSize)
                 EVT_TEXT(1, Frame::OnInput)
+                EVT_CLOSE(Frame::OnClose)
 wxEND_EVENT_TABLE()
 
 Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
@@ -41,11 +42,11 @@ Frame::Frame(const wxString &title, const wxPoint &pos, const wxSize &size)
     m_txt_input= new wxTextCtrl(this, 1);
     InputSizer->Add(m_txt_input, 1);
 
-//    InputSizer->Add(10, 0);
+ //  InputSizer->Add(10, 0);
 
-//    wxButton *butSearch = new wxButton(this, ID_BUTTON_INPUT, _T("Search"));
+ //   wxButton *butSearch = new wxButton(this, ID_BUTTON_INPUT, _T("Search"));
 
-//    InputSizer->Add(butSearch, 0, wxALL | wxALIGN_LEFT, 1);
+ //   InputSizer->Add(butSearch, 0, wxALL | wxALIGN_LEFT, 1);
 
     mainSizer->Add(InputSizer, 0, wxEXPAND | wxALL, 5);
 
@@ -68,7 +69,17 @@ void Frame::OnSize(wxSizeEvent &event) {
     m_chkBox->SetSize(rect.x + 5, rect.y + 2, rect.width - 4, rect.height - 4);
 }
 
-void Frame::OnExit(wxCommandEvent& event) { Close(true); }
+void Frame::OnExit(wxCommandEvent& event)
+{
+    searcher->BrokeIt();
+    tp.Reset();
+    tp.AddTask([this] {
+        while (tp.WorkersCount() != 1) {
+            std::this_thread::yield();
+        }
+        Close(true);
+    });
+}
 
 void Frame::OnAbout(wxCommandEvent& event) {
     wxMessageBox("This is an application for searching for words that contain a string entered by the user", "About Dictionary",
@@ -93,4 +104,15 @@ void Frame::OnInput(wxCommandEvent &event) {
         predicate = std::make_shared<DefaultSearch>(word);
 
     searcher->PrepareSource(tp, predicate);
+}
+
+void Frame::OnClose(wxCloseEvent& event) {
+    searcher->BrokeIt();
+    tp.Reset();
+    tp.AddTask([this] {
+        while (tp.WorkersCount() != 1) {
+            std::this_thread::yield();
+        }
+        Destroy();
+    });
 }

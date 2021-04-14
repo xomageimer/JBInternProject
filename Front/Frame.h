@@ -20,6 +20,7 @@ public:
 
 public:
     void OnExit(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnInput(wxCommandEvent& event);
     void OnSize(wxSizeEvent& event);
